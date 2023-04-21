@@ -28,9 +28,9 @@ CREATE TABLE employee(
     FOREIGN KEY (role_id)
         REFERENCES role(id)
         ON DELETE RESTRICT ON UPDATE CASCADE
-    manager_id INTEGER NOT NULL
+    manager_id INTEGER NULL
     FOREIGN KEY (manager_id)
-        REFERENCES manager(id)
+        REFERENCES employee(id)
         ON DELETE SET NULL
         ON UPDATE CASCADE
     
