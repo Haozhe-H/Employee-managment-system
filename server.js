@@ -34,21 +34,25 @@ const afterConnection = () => {
   userPrompt();
 };
 
+// let choiceList = [
+//   "View all employees", "View all departments","View all roles"
+// ]
+
 const userPrompt = () => {
   inquirer
     .prompt([
       {
-        type: "rawlist",
+        type: "list",
         name: "choices",
         message: "What would you like to do?",
         choices: [
           "View all employees",
-          // "Add employee",
-          // "Update employee role",
-          // "Update employee manager",
+          "Add employee",
+          "Update employee role",
+          "Update employee manager",
           "Delete employee",
-          // "View all roles",
-          // "Add role",
+          "View all roles",
+          "Add role",
           "Delete role",
           "View all departments",
           "Add department",
@@ -56,8 +60,8 @@ const userPrompt = () => {
           "View employees by department",
           "View department budget",
           "Quit",
-        ],
-      },
+        ]
+      }
     ])
     .then((ans) => {
       const { choices } = ans;
@@ -99,7 +103,7 @@ const userPrompt = () => {
       }
 
       if (choices == "Add department") {
-        // addDepartment();
+        addDepartment();
       }
 
       if (choices == "Delete department") {
@@ -545,3 +549,5 @@ const showDepartment = async () => {
     console.log(error);
   }
 };
+
+
