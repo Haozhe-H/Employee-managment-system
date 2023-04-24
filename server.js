@@ -60,8 +60,8 @@ const userPrompt = () => {
           "View employees by department",
           "View department budget",
           "Quit",
-        ]
-      }
+        ],
+      },
     ])
     .then((ans) => {
       const { choices } = ans;
@@ -536,9 +536,10 @@ const showDepartment = async () => {
     SELECT employee.first_name,
       employee.last_name,
       department.name AS department
-    FROM employee
-      LEFT JOIN role ON employee.role_id = role.id
-      LEFT JOIN department ON role.department_id = department.id
+    FROM department
+      LEFT JOIN role ON role.department_id = department.id
+      LEFT JOIN employee ON employee.role_id = role.id
+      ORDER BY department.id
     `;
 
   try {
@@ -550,4 +551,33 @@ const showDepartment = async () => {
   }
 };
 
+// add department
+const addDepartment = async () => {
+  console.log("Adding a department.  \n=============================");
+  try {
+    const ans = await inquirer.prompt([
+      {
+        type: "input",
+        name: "addDepartment",
+        message: "What department would you want to add?",
+        validate: (input) => {
+          if (input) {
+            return true;
+          } else {
+            console.log("Please enter the department name.");
+            return false;
+          }
+        },
+      },
+    ]);
 
+    const query = `INSERT INTO department (name) VALUES (?)`;
+
+    const [result] = await db.promise().query(query, ans.addDepartment);
+    console.log(`Added ${ans.addDepartment} to departments.`);
+
+    showDepartment();
+  } catch (error) {
+    console.log(error);
+  }
+};
