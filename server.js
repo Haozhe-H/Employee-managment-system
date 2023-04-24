@@ -73,7 +73,7 @@ const userPrompt = () => {
       }
 
       if (choices == "Update employee manager") {
-        // updateManager();
+        updateManager();
       }
 
       if (choices == "Delete employee") {
@@ -235,6 +235,9 @@ const addEmployee = async () => {
 
 // update role
 updateRole = async () => {
+  console.log(
+    "Updating the role of an employee.  \n============================="
+  );
   try {
     // select employee
     const query = `SELECT * FROM employee`;
@@ -255,8 +258,7 @@ updateRole = async () => {
 
     let employee = ans.name;
 
-    const params = [];
-    params.push(employee);
+    const params = [employee];
 
     // select role
     const roleQuery = `SELECT * FROM role`;
@@ -287,5 +289,69 @@ updateRole = async () => {
     showEmployee();
   } catch (error) {
     console.log(error);
+  }
+};
+
+// update manager
+updateManager = async () => {
+  console.log(
+    "Updating the manager of an employee.  \n============================="
+  );
+  try {
+    // select employee
+    const query = `SELECT * FROM employee`;
+
+    const [data] = await db.promise().query(query);
+    const employees = data.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
+      value: id,
+    }));
+
+    const ans = await inquirer.prompt([
+      {
+        type: "list",
+        name: "name",
+        message: "Which employee would you want to update?",
+        choices: employees,
+      },
+    ]);
+
+    const employee = ans.name;
+    const params = [employee];
+
+    // select manager
+    const managerQuery = `SELECT * FROM employee`;
+    const [rows] = await db.promise().query(managerQuery);
+    const managers = rows.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
+      value: id,
+    }));
+
+    const managerChoice = await inquirer.prompt([
+      {
+        type: "list",
+        name: "manager",
+        message: "Who is the new manager of the employee?",
+        choices: managers,
+      },
+    ]);
+
+    const manager = managerChoice.manager;
+    params.push(manager);
+
+    // swap position, update manager where employee is
+    employee = params[0];
+    params[0] = manager;
+    params[1] = employee;
+
+    // update manager
+    const updateQuery = `UPDATE employee SET manager_id = ? WHERE id = ?`;
+    await db.promise().query(updateQuery, params);
+
+    console.log("Employee has been updated.");
+
+    showEmployee();
+  } catch (err) {
+    console.error(err);
   }
 };
