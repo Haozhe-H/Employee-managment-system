@@ -42,12 +42,12 @@ const userPrompt = () => {
         message: "What would you like to do?",
         choices: [
           "View all employees",
-          "Add employee",
-          "Update employee role",
-          "Update employee manager",
-          "Delete employee",
-          "View all roles",
-          "Add role",
+          // "Add employee",
+          // "Update employee role",
+          // "Update employee manager",
+          // "Delete employee",
+          // "View all roles",
+          // "Add role",
           "Delete role",
           "View all departments",
           "Add department",
@@ -500,6 +500,15 @@ deleteRole = async () => {
     ]);
 
     const role = roleChoice.role;
+
+    const employeeQuery = `SELECT COUNT(*) as count FROM employee WHERE role_id = ?`;
+    const [[employeeCount]] = await db.promise().query(employeeQuery, role);
+
+    if (employeeCount.count > 0) {
+      console.log(`Cannot delete role ${role}. ${employeeCount.count} employees have this role.`);
+      return;
+    }
+
     const deleteQuery = `DELETE FROM role WHERE id = ?`;
 
     const [result] = await db.promise().query(deleteQuery, role);
@@ -512,4 +521,23 @@ deleteRole = async () => {
   }
 };
 
+// show department
+const showDepartment = async () => {
+  console.log("Showing all departments.  \n=============================");
+  const query = `
+    SELECT employee.first_name,
+      employee.last_name,
+      department.name AS department
+    FROM employee
+      LEFT JOIN role ON employee.role_id = role.id
+      LEFT JOIN department ON role.department_id = department.id
+    `;
 
+  try {
+    const [data] = await db.promise().query(query);
+    console.table(data);
+    userPrompt();
+  } catch (error) {
+    console.log(error);
+  }
+};
