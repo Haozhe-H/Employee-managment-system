@@ -5,6 +5,7 @@ const cTable = require("console.table");
 require("dotenv").config();
 
 // const {showEmployee} = require('./utils/showEmployee')
+// ${role} not showing the correct role name in deleteRole()
 
 // connect to DB
 const db = mysql.createConnection(
@@ -45,7 +46,7 @@ const userPrompt = () => {
           // "Add employee",
           // "Update employee role",
           // "Update employee manager",
-          // "Delete employee",
+          "Delete employee",
           // "View all roles",
           // "Add role",
           "Delete role",
@@ -378,7 +379,7 @@ deleteEmployee = async () => {
         choices: employees,
       },
     ]);
-
+    // console.log(ans);
     const employee = ans.name;
 
     // delete query
@@ -492,20 +493,23 @@ deleteRole = async () => {
 
     const roleChoice = await inquirer.prompt([
       {
-        type: 'list',
-        name: 'role',
+        type: "list",
+        name: "role",
         message: "Which role do you want to delete?",
-        choices: roles
-      }
+        choices: roles,
+      },
     ]);
-
+    // console.log(roleChoice); {role: 1}
     const role = roleChoice.role;
+    // console.log(role);
 
     const employeeQuery = `SELECT COUNT(*) as count FROM employee WHERE role_id = ?`;
     const [[employeeCount]] = await db.promise().query(employeeQuery, role);
 
     if (employeeCount.count > 0) {
-      console.log(`Cannot delete role ${role}. ${employeeCount.count} employees have this role.`);
+      console.log(
+        `Cannot delete this role. ${employeeCount.count} employees have this role.`
+      );
       return;
     }
 
