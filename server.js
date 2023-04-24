@@ -1,7 +1,6 @@
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
-const Connection = require("mysql2");
 
 require("dotenv").config();
 
@@ -81,11 +80,11 @@ const userPrompt = () => {
       }
 
       if (choices == "View all roles") {
-        // showRole();
+        showRole();
       }
 
       if (choices == "Add role") {
-        // addRole();
+        addRole();
       }
 
       if (choices == "Delete role") {
@@ -358,36 +357,59 @@ updateManager = async () => {
 
 // delete employee
 deleteEmployee = async () => {
-  console.log(
-    "Deleting an employee.  \n============================="
-  );
+  console.log("Deleting an employee.  \n=============================");
   try {
     // select employee
     const query = `SELECT * FROM employee`;
 
     const [data] = await db.promise().query(query);
-    const employees = data.map(({ id, first_name, last_name }) => ({ name: `${first_name} ${last_name}`, value: id }));
-    
+    const employees = data.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
+      value: id,
+    }));
+
     const ans = await inquirer.prompt([
       {
-        type: 'list',
-        name: 'name',
+        type: "list",
+        name: "name",
         message: "Which employee would you want to delete?",
-        choices: employees
-      }
+        choices: employees,
+      },
     ]);
 
     const employee = ans.name;
-    
+
     // delete query
     const deleteQuery = `DELETE FROM employee WHERE id = ?`;
     const [result] = await db.promise().query(deleteQuery, employee);
 
     console.log("Employee has been deleted!");
-  
+
     showEmployee();
   } catch (err) {
     console.error(err);
   }
 };
+
+// show roles
+const showRole = async () => {
+  console.log("Showing all roles.  \n=============================");
+  const query = `
+    SELECT role.id,
+      role.title,
+      department.name AS department
+    FROM role
+      INNER JOIN department ON role.department_id = department.id
+    `;
+
+  try {
+    const [data] = await db.promise().query(query);
+    console.table(data);
+    userPrompt();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// add role
 
