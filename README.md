@@ -38,7 +38,7 @@
 
 ## Features:
 
-### This application allow user to view, add and delete employees, roles and departments, it can also update employee informations such as which role and manager he/she belongs to , it can also shows the employees gourped by departments and view the department budgets.
+### This application allow user to view, add and delete employees, roles and departments, it can also update employee informations such as which role and manager he/she belongs to , it can also shows the employees grouped by departments and view the department budgets.
 
 ## Contributors:
 
