@@ -77,7 +77,7 @@ const userPrompt = () => {
       }
 
       if (choices == "Delete employee") {
-        // deleteEmployee();
+        deleteEmployee();
       }
 
       if (choices == "View all roles") {
@@ -316,7 +316,7 @@ updateManager = async () => {
       },
     ]);
 
-    const employee = ans.name;
+    let employee = ans.name;
     const params = [employee];
 
     // select manager
@@ -355,3 +355,39 @@ updateManager = async () => {
     console.error(err);
   }
 };
+
+// delete employee
+deleteEmployee = async () => {
+  console.log(
+    "Deleting an employee.  \n============================="
+  );
+  try {
+    // select employee
+    const query = `SELECT * FROM employee`;
+
+    const [data] = await db.promise().query(query);
+    const employees = data.map(({ id, first_name, last_name }) => ({ name: `${first_name} ${last_name}`, value: id }));
+    
+    const ans = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'name',
+        message: "Which employee would you want to delete?",
+        choices: employees
+      }
+    ]);
+
+    const employee = ans.name;
+    
+    // delete query
+    const deleteQuery = `DELETE FROM employee WHERE id = ?`;
+    const [result] = await db.promise().query(deleteQuery, employee);
+
+    console.log("Employee has been deleted!");
+  
+    showEmployee();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
