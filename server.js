@@ -69,7 +69,7 @@ const userPrompt = () => {
       }
 
       if (choices == "Update employee role") {
-        // updateRole();
+        updateRole();
       }
 
       if (choices == "Update employee manager") {
@@ -210,7 +210,6 @@ const addEmployee = async () => {
       name: `${first_name} ${last_name}`,
       value: id,
     }));
-    console.log(managers);
 
     const managerChoice = await inquirer.prompt([
       {
@@ -227,6 +226,64 @@ const addEmployee = async () => {
 
     const [results] = await db.promise().query(query, params);
     console.log("New employee has been added.");
+
+    showEmployee();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// update role
+updateRole = async () => {
+  try {
+    // select employee
+    const query = `SELECT * FROM employee`;
+    const [data] = await db.promise().query(query);
+    const employees = data.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
+      value: id,
+    }));
+
+    const ans = await inquirer.prompt([
+      {
+        type: "list",
+        name: "name",
+        message: "Which employee would you want to update?",
+        choices: employees,
+      },
+    ]);
+
+    let employee = ans.name;
+
+    const params = [];
+    params.push(employee);
+
+    // select role
+    const roleQuery = `SELECT * FROM role`;
+    const [rows] = await db.promise().query(roleQuery);
+    const roles = rows.map(({ id, title }) => ({ name: title, value: id }));
+
+    const roleChoice = await inquirer.prompt([
+      {
+        type: "list",
+        name: "role",
+        message: "What's the new role of this employee?",
+        choices: roles,
+      },
+    ]);
+
+    const role = roleChoice.role;
+    params.push(role);
+
+    // swap position, update role where employee is
+    employee = params[0];
+    params[0] = role;
+    params[1] = employee;
+
+    const updateQuery = `UPDATE employee SET role_id = ? WHERE id = ?`;
+    await db.promise().query(updateQuery, params);
+    console.log("Employee has been updated.");
+
     showEmployee();
   } catch (error) {
     console.log(error);
