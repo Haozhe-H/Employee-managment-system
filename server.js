@@ -4,6 +4,8 @@ const cTable = require("console.table");
 
 require("dotenv").config();
 
+// const {showEmployee} = require('./utils/showEmployee')
+
 // connect to DB
 const db = mysql.createConnection(
   {
@@ -88,11 +90,11 @@ const userPrompt = () => {
       }
 
       if (choices == "Delete role") {
-        // deleteRole();
+        deleteRole();
       }
 
       if (choices == "View all departments") {
-        // viewDepartment();
+        showDepartment();
       }
 
       if (choices == "Add department") {
@@ -350,8 +352,8 @@ updateManager = async () => {
     console.log("Employee has been updated.");
 
     showEmployee();
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
   }
 };
 
@@ -383,11 +385,11 @@ deleteEmployee = async () => {
     const deleteQuery = `DELETE FROM employee WHERE id = ?`;
     const [result] = await db.promise().query(deleteQuery, employee);
 
-    console.log("Employee has been deleted!");
+    console.log(`Employee ${employee} has been deleted!`);
 
     showEmployee();
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
   }
 };
 
@@ -412,4 +414,102 @@ const showRole = async () => {
 };
 
 // add role
+const addRole = async () => {
+  console.log("Adding a new role.  \n=============================");
+  try {
+    const ans = await inquirer.prompt([
+      {
+        type: "input",
+        name: "role",
+        message: "Which role do you want to add?",
+        validate: (input) => {
+          if (input) {
+            return true;
+          } else {
+            console.log("Please enter a role.");
+            return false;
+          }
+        },
+      },
+
+      {
+        type: "input",
+        name: "salary",
+        message: "What's the salary of this role?",
+        validate: (input) => {
+          if (!isNaN(input)) {
+            return true;
+          } else {
+            console.log("Please enter the salary for this new role.");
+            return false;
+          }
+        },
+      },
+    ]);
+
+    const params = [ans.role, ans.salary];
+
+    // select department
+    const query = `SELECT name, id FROM department`;
+
+    const [data] = await db.promise().query(query);
+    const departments = data.map(({ name, id }) => ({ name: name, value: id }));
+
+    const deptChoice = await inquirer.prompt([
+      {
+        type: "list",
+        name: "dept",
+        message: "Which department is this role belong to?",
+        choices: departments,
+      },
+    ]);
+
+    const department = deptChoice.dept;
+    params.push(department);
+
+    // insert role query
+    const roleQuery = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
+
+    const [result] = await db.promise().query(roleQuery, params);
+
+    console.log(`Added ${ans.role} to system.`);
+
+    showRole();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// delete role
+deleteRole = async () => {
+  console.log("Deleting a role.  \n=============================");
+
+  try {
+    const query = `SELECT * FROM role`;
+    const [data] = await db.promise().query(query);
+
+    const roles = data.map(({ title, id }) => ({ name: title, value: id }));
+
+    const roleChoice = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'role',
+        message: "Which role do you want to delete?",
+        choices: roles
+      }
+    ]);
+
+    const role = roleChoice.role;
+    const deleteQuery = `DELETE FROM role WHERE id = ?`;
+
+    const [result] = await db.promise().query(deleteQuery, role);
+
+    console.log(`Role ${role} has been deleted.`);
+
+    showRole();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
