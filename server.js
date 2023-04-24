@@ -622,6 +622,34 @@ const showDepartment = async () => {
       `;
     const [data] = await db.promise().query(query);
     console.table(data);
+
+    userPrompt();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// show department budgets
+const showBudget = async () => {
+  console.log(
+    "Showing all departments' budget.  \n============================="
+  );
+
+  const query = `
+    SELECT department_id AS id, 
+      department.name AS department,
+      SUM(CASE WHEN employee.id IS NOT NULL THEN role.salary ELSE 0 END) AS budget
+    FROM role  
+      JOIN department ON role.department_id = department.id
+      LEFT JOIN employee ON role.id = employee.role_id
+      GROUP BY department_id
+    `;
+
+  try {
+    const [data] = await db.promise().query(query);
+    console.table(data);
+
+    userPrompt();
   } catch (error) {
     console.log(error);
   }
