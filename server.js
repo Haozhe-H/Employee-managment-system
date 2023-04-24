@@ -36,7 +36,7 @@ const userPrompt = () => {
   inquirer
     .prompt([
       {
-        type: "list",
+        type: "rawlist",
         name: "choices",
         message: "What would you like to do?",
         choices: [
@@ -65,7 +65,7 @@ const userPrompt = () => {
       }
 
       if (choices == "Add employee") {
-        // addEmployee();
+        addEmployee();
       }
 
       if (choices == "Update employee role") {
@@ -136,15 +136,99 @@ const showEmployee = async () => {
     `;
 
   try {
-    const [data] = await db.promise().query(query)
-    console.table(data)
-    userPrompt()
+    const [data] = await db.promise().query(query);
+    console.table(data);
+    userPrompt();
   } catch (error) {
     console.log(error);
   }
-  // db.promise().query(query, (err, data) => {
-  //   if (err) throw err;
-  //   console.table(data);
-  //   userPrompt();
-  // });
+};
+
+// add employee
+const addEmployee = async () => {
+  console.log("Adding an employee.  \n=============================");
+  // name input
+  try {
+    const ans = await inquirer.prompt([
+      {
+        type: "input",
+        name: "firstName",
+        message: "What's the first name of the new employee?",
+        validate: (input) => {
+          if (input) {
+            return true;
+          } else {
+            console.log("Please enter the first name of the new employee.");
+            return false;
+          }
+        },
+      },
+
+      {
+        type: "input",
+        name: "lastName",
+        message: "What's the last name of the new employee?",
+        validate: (input) => {
+          if (input) {
+            return true;
+          } else {
+            console.log("Please enter the last name of the new employee.");
+            return false;
+          }
+        },
+      },
+    ]);
+
+    const params = [ans.firstName, ans.lastName];
+
+    // add role
+    const roleQuery = `SELECT role.id, role.title FROM role`;
+
+    const [rows] = await db.promise().query(roleQuery);
+    const roles = rows.map(({ id, title }) => ({
+      name: title,
+      value: id,
+    }));
+
+    const roleChoice = await inquirer.prompt([
+      {
+        type: "list",
+        name: "role",
+        message: "What's the role of the new employee?",
+        choices: roles,
+      },
+    ]);
+    const role = roleChoice.role;
+    params.push(role);
+
+    // add manager
+    const managerQuery = `SELECT * FROM employee`;
+
+    const [managerRows] = await db.promise().query(managerQuery);
+
+    const managers = managerRows.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
+      value: id,
+    }));
+    console.log(managers);
+
+    const managerChoice = await inquirer.prompt([
+      {
+        type: "list",
+        name: "manager",
+        message: "Who's the manager of the new employee?",
+        choices: managers,
+      },
+    ]);
+    const manager = managerChoice.manager;
+    params.push(manager);
+
+    const query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUE (?, ?, ?, ?)`;
+
+    const [results] = await db.promise().query(query, params);
+    console.log("New employee has been added.");
+    showEmployee();
+  } catch (error) {
+    console.log(error);
+  }
 };
