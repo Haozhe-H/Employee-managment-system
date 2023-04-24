@@ -22,11 +22,11 @@
 
 ## Installation:
 
-### To install this application, first run npm i to install all the required packages, then create the .env file for MySQL, source the schema and seeds, then run npm run start to run this application.
+### To install this application, first run `npm i` to install all the required packages, then create the `.env` file for MySQL, source the schema and seeds, then run `npm run start` to run this application.
 
 ## Usage:
 
-### After installation, run npm run start to start the application, then user can scorll up and down to choose which function they want to run to manage the employee database.
+### After installation, run `npm run start` to start the application, then user can scorll up and down to choose which function they want to run to manage the employee database. For more information please visit this walk-throught video: https://watch.screencastify.com/v/zBBmT914SiSyCBynJsX7
 
 ## Credits:
 
