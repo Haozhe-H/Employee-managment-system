@@ -37,7 +37,7 @@ const userPrompt = () => {
     .prompt([
       {
         type: "list",
-        name: "options",
+        name: "choices",
         message: "What would you like to do?",
         choices: [
           "View all employees",
@@ -65,55 +65,86 @@ const userPrompt = () => {
       }
 
       if (choices == "Add employee") {
-        addEmployee();
+        // addEmployee();
       }
 
       if (choices == "Update employee role") {
-        updateRole();
+        // updateRole();
       }
 
       if (choices == "Update employee manager") {
-        updateManager();
+        // updateManager();
       }
 
       if (choices == "Delete employee") {
-        deleteEmployee();
+        // deleteEmployee();
       }
 
       if (choices == "View all roles") {
-        showRole();
+        // showRole();
       }
 
       if (choices == "Add role") {
-        addRole();
+        // addRole();
       }
 
       if (choices == "Delete role") {
-        deleteRole();
+        // deleteRole();
       }
 
       if (choices == "View all departments") {
-        viewDepartment();
+        // viewDepartment();
       }
 
       if (choices == "Add department") {
-        addDepartment();
+        // addDepartment();
       }
 
       if (choices == "Delete department") {
-        deleteDepartment();
+        // deleteDepartment();
       }
 
       if (choices == "View employees by department") {
-        showDepartmentEmployee();
+        // showDepartmentEmployee();
       }
 
       if (choices == "View department budget") {
-        showBudget();
+        // showBudget();
       }
 
       if (choices == "Quit") {
         db.end();
       }
     });
+};
+
+// show employee
+const showEmployee = async () => {
+  console.log("Showing all employees.  \n=============================");
+  const query = `
+    SELECT employee.id,
+      employee.first_name,
+      employee.last_name,
+      role.title,
+      department.name AS department,
+      role.salary,
+      CONCAT(manager.first_name, ' ', manager.last_name) AS manager
+    FROM employee
+      LEFT JOIN role ON employee.role_id = role.id
+      LEFT JOIN department ON role.department_id = department.id
+      LEFT JOIN employee manager ON employee.manager_id = manager.id
+    `;
+
+  try {
+    const [data] = await db.promise().query(query)
+    console.table(data)
+    userPrompt()
+  } catch (error) {
+    console.log(error);
+  }
+  // db.promise().query(query, (err, data) => {
+  //   if (err) throw err;
+  //   console.table(data);
+  //   userPrompt();
+  // });
 };
