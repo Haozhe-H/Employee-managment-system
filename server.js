@@ -107,15 +107,15 @@ const userPrompt = () => {
       }
 
       if (choices == "Delete department") {
-        // deleteDepartment();
+        deleteDepartment();
       }
 
       if (choices == "View employees by department") {
-        // showDepartmentEmployee();
+        showDepartmentEmployee();
       }
 
       if (choices == "View department budget") {
-        // showBudget();
+        showBudget();
       }
 
       if (choices == "Quit") {
@@ -530,8 +530,10 @@ deleteRole = async () => {
 };
 
 // show department
-const showDepartment = async () => {
-  console.log("Showing all departments.  \n=============================");
+const showDepartmentEmployee = async () => {
+  console.log(
+    "Showing employees by department.  \n============================="
+  );
   const query = `
     SELECT employee.first_name,
       employee.last_name,
@@ -545,6 +547,7 @@ const showDepartment = async () => {
   try {
     const [data] = await db.promise().query(query);
     console.table(data);
+
     userPrompt();
   } catch (error) {
     console.log(error);
@@ -577,6 +580,48 @@ const addDepartment = async () => {
     console.log(`Added ${ans.addDepartment} to departments.`);
 
     showDepartment();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// delete a department
+const deleteDepartment = async () => {
+  console.log("Deleting a department.  \n=============================");
+  try {
+    const [data] = await db.promise().query("SELECT * FROM department");
+    const departments = data.map(({ name, id }) => ({ name, value: id }));
+
+    const deptChoice = await inquirer.prompt([
+      {
+        type: "list",
+        name: "dept",
+        message: "What department would you want to delete?",
+        choices: departments,
+      },
+    ]);
+
+    const query = `DELETE FROM department WHERE id = ?`;
+    const [result] = await db.promise().query(query, deptChoice.dept);
+    console.log("The department has been deleted.");
+
+    showDepartment();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// show all department
+const showDepartment = async () => {
+  console.log("Showing all departments.  \n=============================");
+  try {
+    const query = `
+      SELECT department.id AS id, 
+        department.name AS department 
+      FROM department
+      `;
+    const [data] = await db.promise().query(query);
+    console.table(data);
   } catch (error) {
     console.log(error);
   }
